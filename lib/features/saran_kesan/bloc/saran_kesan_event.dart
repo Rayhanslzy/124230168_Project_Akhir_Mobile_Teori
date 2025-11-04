@@ -6,10 +6,8 @@ abstract class SaranKesanEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// Event untuk memuat data yang sudah tersimpan
 class LoadSaranKesan extends SaranKesanEvent {}
 
-// Event untuk menyimpan data baru
 class SaveSaranKesan extends SaranKesanEvent {
   final String saran;
   final String kesan;

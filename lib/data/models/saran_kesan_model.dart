@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/data/models/saran_kesan_model.dart (Versi Final - Bersih)
-// ---------------------------------------------------
+// --------------------------------------
+// lib/data/models/saran_kesan_model.dart
+// --------------------------------------
 import 'package:hive/hive.dart';
 
 part 'saran_kesan_model.g.dart';

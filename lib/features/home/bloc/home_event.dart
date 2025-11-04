@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/home/bloc/home_event.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// --------------------------------------
+// lib/features/home/bloc/home_event.dart
+// --------------------------------------
 
 part of 'home_bloc.dart';
 
@@ -11,5 +11,11 @@ abstract class HomeEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// Event ini akan kita panggil saat Halaman Home pertama kali dibuka
-class FetchHomeData extends HomeEvent {}
+class FetchHomeData extends HomeEvent {
+  final bool isRefresh;
+
+  const FetchHomeData({this.isRefresh = false});
+
+  @override
+  List<Object> get props => [isRefresh];
+}

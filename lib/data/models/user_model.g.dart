@@ -1,10 +1,8 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'user_model.dart';
 
-// **************************************************************************
+// ********************
 // TypeAdapterGenerator
-// **************************************************************************
+// ********************
 
 class UserAdapter extends TypeAdapter<User> {
   @override
@@ -19,17 +17,20 @@ class UserAdapter extends TypeAdapter<User> {
     return User(
       username: fields[0] as String,
       encryptedPassword: fields[1] as String,
+      profileImagePath: fields[2] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, User obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.username)
       ..writeByte(1)
-      ..write(obj.encryptedPassword);
+      ..write(obj.encryptedPassword)
+      ..writeByte(2)
+      ..write(obj.profileImagePath);
   }
 
   @override

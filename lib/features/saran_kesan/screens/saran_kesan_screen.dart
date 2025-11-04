@@ -1,5 +1,5 @@
 // ---------------------------------------------------
-// lib/features/saran_kesan/screens/saran_kesan_screen.dart (Final)
+// lib/features/saran_kesan/screens/saran_kesan_screen.dart
 // ---------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -17,7 +17,7 @@ class SaranKesanScreen extends StatelessWidget {
       create: (context) => SaranKesanBloc(
         repository: RepositoryProvider.of<SaranKesanRepository>(context),
       )
-        ..add(LoadSaranKesan()), // Langsung muat data yang tersimpan
+        ..add(LoadSaranKesan()),
       child: const SaranKesanView(),
     );
   }
@@ -50,7 +50,6 @@ class _SaranKesanViewState extends State<SaranKesanView> {
         title: const Text('Saran dan Kesan'),
       ),
       body: BlocListener<SaranKesanBloc, SaranKesanState>(
-        // Listener untuk menampilkan SnackBar saat sukses
         listener: (context, state) {
           if (state is SaranKesanSaveSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -61,11 +60,9 @@ class _SaranKesanViewState extends State<SaranKesanView> {
             );
           }
         },
-        // Builder untuk mengisi form dengan data yang sudah ada
         child: BlocBuilder<SaranKesanBloc, SaranKesanState>(
           builder: (context, state) {
             
-            // Jika data sudah dimuat, isi controllernya
             if (state is SaranKesanLoaded && state.entry != null) {
               _saranController.text = state.entry!.saran;
               _kesanController.text = state.entry!.kesan;
@@ -109,13 +106,11 @@ class _SaranKesanViewState extends State<SaranKesanView> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Tombol Simpan
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     onPressed: () {
-                      // Kirim event untuk menyimpan
                       context.read<SaranKesanBloc>().add(
                             SaveSaranKesan(
                               saran: _saranController.text,
@@ -123,7 +118,6 @@ class _SaranKesanViewState extends State<SaranKesanView> {
                             ),
                           );
                     },
-                    // Tampilkan loading di tombol jika sedang menyimpan
                     child: (state is SaranKesanLoading)
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text('Simpan'),

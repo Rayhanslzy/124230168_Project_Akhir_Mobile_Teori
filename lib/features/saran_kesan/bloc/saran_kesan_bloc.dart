@@ -28,7 +28,6 @@ class SaranKesanBloc extends Bloc<SaranKesanEvent, SaranKesanState> {
       try {
         await repository.saveSaranKesan(event.saran, event.kesan);
         emit(SaranKesanSaveSuccess());
-        // Setelah sukses, muat ulang data untuk ditampilkan
         add(LoadSaranKesan()); 
       } catch (e) {
         emit(SaranKesanError(message: e.toString()));

@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/lbs_demo/bloc/lbs_event.dart (File Baru)
-// ---------------------------------------------------
+// -----------------------------------------
+// lib/features/lbs_demo/bloc/lbs_event.dart
+// -----------------------------------------
 
 part of 'lbs_bloc.dart';
 
@@ -10,5 +10,4 @@ abstract class LbsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-/// Event untuk memicu pengambilan data lokasi
 class FetchLocation extends LbsEvent {}

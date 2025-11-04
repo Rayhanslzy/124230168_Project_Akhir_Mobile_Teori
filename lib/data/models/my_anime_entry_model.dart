@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/data/models/my_anime_entry_model.dart (Versi Final - Bersih)
-// ---------------------------------------------------
+// -----------------------------------------
+// lib/data/models/my_anime_entry_model.dart
+// -----------------------------------------
 import 'package:hive/hive.dart';
 
 part 'my_anime_entry_model.g.dart';

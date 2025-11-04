@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/search/bloc/search_event.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// ------------------------------------------
+// lib/features/search/bloc/search_event.dart
+// ------------------------------------------
 
 part of 'search_bloc.dart';
 
@@ -10,10 +10,13 @@ abstract class SearchEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// Event yang dikirim saat teks di search bar berubah
 class SearchQueryChanged extends SearchEvent {
   final String query;
   const SearchQueryChanged({required this.query});
   @override
   List<Object> get props => [query];
 }
+
+class LoadRecentSearches extends SearchEvent {}
+
+class ClearRecentSearches extends SearchEvent {}

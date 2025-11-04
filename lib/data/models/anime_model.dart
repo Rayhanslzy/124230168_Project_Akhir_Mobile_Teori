@@ -1,24 +1,24 @@
-// ---------------------------------------------------
-// lib/data/models/anime_model.dart (Update)
-// ---------------------------------------------------
+// --------------------------------
+// lib/data/models/anime_model.dart
+// --------------------------------
 
 class AnimeModel {
   final int id;
   final String title;
   final String coverImageUrl;
-  final int? averageScore; // Skor rata-rata (0-100)
+  final int? averageScore;
   
   // --- FIELD BARU (Nullable) ---
-  final String? description; // Sinopsis/Deskripsi
-  final List<String>? genres; // List genre
+  final String? description;
+  final List<String>? genres;
 
   AnimeModel({
     required this.id,
     required this.title,
     required this.coverImageUrl,
     this.averageScore,
-    this.description, // Tambah di constructor
-    this.genres,        // Tambah di constructor
+    this.description, 
+    this.genres,   
   });
 
   // Factory constructor untuk mengubah JSON (Map) dari API menjadi Objek AnimeModel
@@ -27,8 +27,6 @@ class AnimeModel {
     // Konversi 'genres' dari List<dynamic> ke List<String>
     List<String>? genreList;
     if (json['genres'] != null) {
-      // Kita ubah (List<dynamic>) [ "Action", "Adventure" ] 
-      // menjadi (List<String>) [ "Action", "Adventure" ]
       genreList = List<String>.from(json['genres'].map((g) => g.toString()));
     }
 
@@ -39,8 +37,8 @@ class AnimeModel {
       averageScore: json['averageScore'],
       
       // --- Parsing Data BARU ---
-      description: json['description'], // Akan null jika tidak ada
-      genres: genreList,            // Akan null jika tidak ada
+      description: json['description'],
+      genres: genreList,          
     );
   }
 }

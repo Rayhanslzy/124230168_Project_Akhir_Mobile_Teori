@@ -1,5 +1,5 @@
 // ---------------------------------------------------
-// lib/main.dart (REVISI - Init NotificationService)
+// lib/main.dart (REVISI)
 // ---------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -9,7 +9,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ta_teori/core/api/graphql_client.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 
-// IMPORT BARU
 import 'package:ta_teori/core/services/notification_service.dart';
 
 // Import model
@@ -26,35 +25,32 @@ import 'package:ta_teori/data/repositories/anime_repository.dart';
 import 'package:ta_teori/data/repositories/my_list_repository.dart';
 import 'package:ta_teori/data/repositories/saran_kesan_repository.dart';
 import 'package:ta_teori/data/repositories/location_repository.dart';
+import 'package:ta_teori/data/repositories/search_history_repository.dart';
 
 // Import BLoC & Screen
 import 'package:ta_teori/features/auth/bloc/auth_bloc.dart';
 import 'package:ta_teori/features/auth/screens/login_screen.dart';
+import 'package:ta_teori/features/my_list/bloc/my_list_bloc.dart';
 
 void main() async {
-  // Pastikan binding terinisialisasi
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inisialisasi Timezone (untuk Konverter & Notifikasi)
   tzdata.initializeTimeZones();
-
-  // PENAMBAHAN BARU: Inisialisasi Notification Service
   await NotificationService().init();
-
-  // Inisialisasi Hive
   await Hive.initFlutter();
+  await initHiveForFlutter();
 
   // Daftarkan semua Adapter
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(SaranKesanAdapter());
   Hive.registerAdapter(MyAnimeEntryModelAdapter());
 
-  // Buka semua Box
+  // Buka semua Box kustom
   await Hive.openBox<User>('userBox');
   await Hive.openBox<SaranKesan>('saranKesanBox');
   await Hive.openBox<MyAnimeEntryModel>('myAnimeEntryBox');
+  await Hive.openBox('graphqlClientStore');
+  await Hive.openBox<String>('searchHistoryBox');
 
-  // Inisialisasi Klien GraphQL
   final client = GraphQLClientConfig.initializeClient();
 
   runApp(MyApp(graphqlClient: client));
@@ -93,6 +89,9 @@ class MyApp extends StatelessWidget {
           RepositoryProvider<LocationRepository>(
             create: (context) => LocationRepository(),
           ),
+          RepositoryProvider<SearchHistoryRepository>(
+            create: (context) => SearchHistoryRepository(),
+          ),
         ],
         child: MultiBlocProvider(
           providers: [
@@ -100,6 +99,11 @@ class MyApp extends StatelessWidget {
               create: (context) => AuthBloc(
                 authRepository: context.read<AuthRepository>(),
               ),
+            ),
+            BlocProvider<MyListBloc>(
+              create: (context) => MyListBloc(
+                myListRepository: context.read<MyListRepository>(),
+              )..add(LoadMyList()),
             ),
           ],
           child: MaterialApp(

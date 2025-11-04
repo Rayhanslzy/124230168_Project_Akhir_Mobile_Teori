@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/home/bloc/home_state.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// --------------------------------------
+// lib/features/home/bloc/home_state.dart
+// --------------------------------------
 
 part of 'home_bloc.dart';
 
@@ -11,15 +11,12 @@ abstract class HomeState extends Equatable {
   List<Object> get props => [];
 }
 
-// State Awal / Kosong
 class HomeInitial extends HomeState {}
 
-// State saat sedang loading data
 class HomeLoading extends HomeState {}
 
-// State saat data berhasil dimuat
 class HomeLoaded extends HomeState {
-  // Kita simpan data anime di dalam state ini
+
   final List<AnimeModel> popularAnime;
 
   const HomeLoaded({required this.popularAnime});
@@ -28,7 +25,6 @@ class HomeLoaded extends HomeState {
   List<Object> get props => [popularAnime];
 }
 
-// State saat terjadi error
 class HomeError extends HomeState {
   final String message;
 

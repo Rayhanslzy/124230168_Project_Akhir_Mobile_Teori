@@ -1,20 +1,18 @@
-// ---------------------------------------------------
-// lib/features/search/bloc/search_bloc.dart (REVISI FINAL - Perbaikan Import)
-// ---------------------------------------------------
+// -----------------------------------------
+// lib/features/search/bloc/search_bloc.dart
+// -----------------------------------------
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-// PERBAIKAN: Mengganti 'package.' menjadi 'package:'
 import 'package:stream_transform/stream_transform.dart';
 
 import 'package:ta_teori/data/models/anime_model.dart';
 import 'package:ta_teori/data/repositories/anime_repository.dart';
+import 'package:ta_teori/data/repositories/search_history_repository.dart';
 
 part 'search_event.dart';
 part 'search_state.dart';
 
-// 2. BUAT FUNGSI DEBOUNCER
-// Durasi 500ms adalah standar yang baik
 EventTransformer<E> _debounce<E>(Duration duration) {
   return (events, mapper) {
     return events.debounce(duration).switchMap(mapper);
@@ -23,27 +21,53 @@ EventTransformer<E> _debounce<E>(Duration duration) {
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final AnimeRepository animeRepository;
+  final SearchHistoryRepository searchHistoryRepository;
 
-  SearchBloc({required this.animeRepository}) : super(SearchInitial()) {
+  SearchBloc({
+    required this.animeRepository,
+    required this.searchHistoryRepository,
+  }) : super(const SearchInitial(recentSearches: [])) {
+    
+    on<LoadRecentSearches>((event, emit) {
+      try {
+        final history = searchHistoryRepository.getSearchHistory();
+        emit(SearchInitial(recentSearches: history));
+      } catch (e) {
+
+        emit(const SearchInitial(recentSearches: []));
+      }
+    });
+
     on<SearchQueryChanged>(
       (event, emit) async {
-        // Jika query kosong, jangan panggil API
         if (event.query.isEmpty) {
-          emit(SearchInitial());
+          final history = searchHistoryRepository.getSearchHistory();
+          emit(SearchInitial(recentSearches: history));
           return;
         }
 
         emit(SearchLoading());
         try {
           final results = await animeRepository.searchAnime(event.query);
+          
+          await searchHistoryRepository.addSearchTerm(event.query);
+          
           emit(SearchLoaded(results: results));
         } catch (e) {
           emit(SearchError(
               message: e.toString().replaceFirst("Exception: ", "")));
         }
       },
-      // 3. TERAPKAN DEBOUNCER DI SINI
       transformer: _debounce(const Duration(milliseconds: 500)),
     );
+
+    on<ClearRecentSearches>((event, emit) async {
+      try {
+        await searchHistoryRepository.clearSearchHistory();
+        emit(const SearchInitial(recentSearches: []));
+      } catch (e) {
+        emit(const SearchInitial(recentSearches: []));
+      }
+    });
   }
 }

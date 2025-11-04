@@ -12,9 +12,8 @@ class ConverterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Gunakan DefaultTabController untuk membuat TABS
     return DefaultTabController(
-      length: 2, // Kita punya 2 tab
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Konverter Utilitas'),
@@ -25,12 +24,9 @@ class ConverterScreen extends StatelessWidget {
             ],
           ),
         ),
-        // 2. TabBarView berisi UI untuk setiap tab
         body: const TabBarView(
           children: [
-            // Tab 1: Konverter Waktu
             _TimeConverterTab(),
-            // Tab 2: Konverter Mata Uang
             _CurrencyConverterTab(),
           ],
         ),
@@ -39,7 +35,6 @@ class ConverterScreen extends StatelessWidget {
   }
 }
 
-// --- TAB 1: KONVERTER WAKTU ---
 class _TimeConverterTab extends StatefulWidget {
   const _TimeConverterTab();
 
@@ -48,13 +43,12 @@ class _TimeConverterTab extends StatefulWidget {
 }
 
 class _TimeConverterTabState extends State<_TimeConverterTab> {
-  TimeOfDay? _selectedTime; // Waktu yang dipilih (JST)
+  TimeOfDay? _selectedTime; 
   String _wib = '...';
   String _wita = '...';
   String _wit = '...';
   String _london = '...';
 
-  // Fungsi untuk memilih waktu
   void _pickTime() async {
     final time = await showTimePicker(
       context: context,
@@ -68,15 +62,12 @@ class _TimeConverterTabState extends State<_TimeConverterTab> {
     }
   }
 
-  // Fungsi untuk konversi waktu
   void _convertTime() {
     if (_selectedTime == null) return;
 
-    // 1. Tentukan lokasi JST (Tokyo)
     final jstLocation = tz.getLocation('Asia/Tokyo');
     final now = tz.TZDateTime.now(jstLocation);
 
-    // 2. Buat waktu JST berdasarkan input pengguna
     final jstTime = tz.TZDateTime(
       jstLocation,
       now.year,
@@ -86,13 +77,11 @@ class _TimeConverterTabState extends State<_TimeConverterTab> {
       _selectedTime!.minute,
     );
 
-    // 3. Tentukan lokasi tujuan (Syarat Tugas)
     final wibLocation = tz.getLocation('Asia/Jakarta');
     final witaLocation = tz.getLocation('Asia/Makassar');
     final witLocation = tz.getLocation('Asia/Jayapura');
     final londonLocation = tz.getLocation('Europe/London');
 
-    // 4. Konversi
     final formatter = DateFormat('HH:mm');
     _wib = formatter.format(tz.TZDateTime.from(jstTime, wibLocation));
     _wita = formatter.format(tz.TZDateTime.from(jstTime, witaLocation));
@@ -112,7 +101,6 @@ class _TimeConverterTabState extends State<_TimeConverterTab> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          // Tombol Pilih Waktu
           ElevatedButton(
             onPressed: _pickTime,
             child: Text(
@@ -122,7 +110,6 @@ class _TimeConverterTabState extends State<_TimeConverterTab> {
             ),
           ),
           const SizedBox(height: 24),
-          // Hasil Konversi
           if (_selectedTime != null) ...[
             Text('WIB (Jakarta): $_wib', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
@@ -138,8 +125,6 @@ class _TimeConverterTabState extends State<_TimeConverterTab> {
   }
 }
 
-
-// --- TAB 2: KONVERTER MATA UANG ---
 class _CurrencyConverterTab extends StatefulWidget {
   const _CurrencyConverterTab();
 
@@ -153,9 +138,7 @@ class _CurrencyConverterTabState extends State<_CurrencyConverterTab> {
   String _usd = '...';
   String _eur = '...';
 
-  // Kita hardcode ratenya (untuk memenuhi syarat tugas)
-  // Dalam aplikasi nyata, ini akan diambil dari API
-  static const double _jpyToIdr = 104.50; // (Contoh rate)
+  static const double _jpyToIdr = 104.50;
   static const double _jpyToUsd = 0.0064;
   static const double _jpyToEur = 0.0060;
 
@@ -200,7 +183,6 @@ class _CurrencyConverterTabState extends State<_CurrencyConverterTab> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          // Input JPY
           TextField(
             controller: _jpyController,
             decoration: const InputDecoration(
@@ -211,7 +193,6 @@ class _CurrencyConverterTabState extends State<_CurrencyConverterTab> {
             onChanged: (value) => _convertCurrency(),
           ),
           const SizedBox(height: 24),
-          // Hasil Konversi (Min. 3 mata uang)
           Text('IDR (Rupiah): $_idr', style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
           Text('USD (Dolar): $_usd', style: const TextStyle(fontSize: 16)),

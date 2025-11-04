@@ -1,13 +1,12 @@
-// ---------------------------------------------------
-// lib/features/lbs_demo/screens/lbs_demo_screen.dart (File Baru)
-// ---------------------------------------------------
+// --------------------------------------------------
+// lib/features/lbs_demo/screens/lbs_demo_screen.dart
+// --------------------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ta_teori/data/repositories/location_repository.dart';
 import 'package:ta_teori/features/lbs_demo/bloc/lbs_bloc.dart';
 
-// Halaman Wrapper untuk menyediakan BLoC
 class LbsDemoScreen extends StatelessWidget {
   const LbsDemoScreen({super.key});
 
@@ -22,7 +21,6 @@ class LbsDemoScreen extends StatelessWidget {
   }
 }
 
-// Halaman UI untuk LBS Demo
 class LbsDemoView extends StatelessWidget {
   const LbsDemoView({super.key});
 
@@ -37,12 +35,10 @@ class LbsDemoView extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: BlocBuilder<LbsBloc, LbsState>(
             builder: (context, state) {
-              // --- State Loading ---
               if (state is LbsLoading) {
                 return const CircularProgressIndicator();
               }
 
-              // --- State Sukses (Loaded) ---
               if (state is LbsLoaded) {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
@@ -68,7 +64,6 @@ class LbsDemoView extends StatelessWidget {
                 );
               }
 
-              // --- State Error ---
               if (state is LbsError) {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
@@ -93,8 +88,6 @@ class LbsDemoView extends StatelessWidget {
                 );
               }
 
-              // --- State Awal (Initial) ---
-              // Tampilkan tombol untuk memulai
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

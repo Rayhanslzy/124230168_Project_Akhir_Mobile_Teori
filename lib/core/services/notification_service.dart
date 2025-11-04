@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/core/services/notification_service.dart (File Baru)
-// ---------------------------------------------------
+// -------------------------------------------
+// lib/core/services/notification_service.dart
+// -------------------------------------------
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -16,14 +16,12 @@ class NotificationService {
 
   Future<void> init() async {
     // --- Inisialisasi Android ---
-    // 'notification_icon' HARUS SAMA dengan nama file .png di android/app/src/main/res/drawable/
     final AndroidInitializationSettings initSettingsAndroid =
         AndroidInitializationSettings('notification_icon');
 
     // --- Inisialisasi iOS ---
     final DarwinInitializationSettings initSettingsIOS =
         DarwinInitializationSettings(
-      // Meminta izin notifikasi (alert, badge, sound) saat init
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
@@ -35,26 +33,24 @@ class NotificationService {
       iOS: initSettingsIOS,
     );
 
-    // Inisialisasi plugin
     await _notificationsPlugin.initialize(initSettings);
 
-    // --- Minta Izin Android 13+ (Penting) ---
-    // Plugin ini menanganinya secara otomatis saat inisialisasi di atas,
-    // tapi kita juga bisa memintanya secara manual jika perlu.
-    _requestAndroidPermission();
+    // --- Minta Izin Android ---
+    await _requestAndroidPermission();
   }
 
   Future<void> _requestAndroidPermission() async {
-    // Untuk Android 13 (API 33) ke atas, kita perlu izin POST_NOTIFICATIONS
-    // Versi plugin ini seharusnya sudah otomatis meminta saat init,
-    // tapi ini adalah cara manual untuk memastikannya.
     final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
         _notificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestNotificationsPermission();
+            
+    if (androidPlugin != null) {
+      await androidPlugin.requestNotificationsPermission();
+      await androidPlugin.requestExactAlarmsPermission();
+    }
   }
 
-  /// Menampilkan notifikasi terjadwal (misal: 5 detik dari sekarang)
+  /// Menampilkan notifikasi terjadwal
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -69,7 +65,7 @@ class NotificationService {
       channelDescription: 'Channel untuk notifikasi Anime App',
       importance: Importance.max,
       priority: Priority.high,
-      icon: 'notification_icon', // Pastikan ikon ini ada
+      icon: 'notification_icon',
       playSound: true,
     );
 
@@ -90,7 +86,7 @@ class NotificationService {
       id,
       title,
       body,
-      tz.TZDateTime.now(tz.local).add(duration), // Waktu (dari sekarang)
+      tz.TZDateTime.now(tz.local).add(duration),
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:

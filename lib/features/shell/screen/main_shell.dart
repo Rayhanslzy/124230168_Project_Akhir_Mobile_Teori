@@ -1,13 +1,11 @@
-// ---------------------------------------------------
-// lib/features/shell/screen/main_shell.dart (Update)
-// ---------------------------------------------------
+// -----------------------------------------
+// lib/features/shell/screen/main_shell.dart
+// -----------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// BARU: Import AuthBloc dan LoginPage
 import 'package:ta_teori/features/auth/bloc/auth_bloc.dart';
 import 'package:ta_teori/features/auth/screens/login_screen.dart'; 
-// Import halaman-halaman lain
 import 'package:ta_teori/features/home/screens/home_screen.dart';
 import 'package:ta_teori/features/my_list/screens/my_list_screen.dart';
 import 'package:ta_teori/features/profile/screens/profile_screen.dart';
@@ -21,15 +19,12 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ShellCubit(),
-      // BARU: Bungkus MainShellView dengan BlocListener
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          // Jika state berubah jadi Unauthenticated (karena logout)
           if (state is AuthUnauthenticated) {
-            // Pindah paksa kembali ke LoginPage
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const LoginPage()),
-              (route) => false, // Hapus semua halaman
+              (route) => false,
             );
           }
         },
@@ -39,7 +34,6 @@ class MainShell extends StatelessWidget {
   }
 }
 
-// Class MainShellView (UI) tetap sama
 class MainShellView extends StatelessWidget {
   const MainShellView({super.key});
 
@@ -47,7 +41,7 @@ class MainShellView extends StatelessWidget {
     HomeScreen(),
     SearchScreen(),
     MyListScreen(),
-    ProfileScreen(), // Pastikan ProfileScreen ada di sini
+    ProfileScreen(),
   ];
 
   @override

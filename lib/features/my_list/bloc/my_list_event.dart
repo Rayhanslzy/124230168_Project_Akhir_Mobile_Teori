@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/my_list/bloc/my_list_event.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// --------------------------------------------
+// lib/features/my_list/bloc/my_list_event.dart
+// --------------------------------------------
 
 part of 'my_list_bloc.dart';
 
@@ -10,13 +10,20 @@ abstract class MyListEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// Event untuk mengambil semua data dari Hive
 class LoadMyList extends MyListEvent {}
 
-// Event untuk menghapus item dari Hive
 class RemoveFromMyList extends MyListEvent {
   final int animeId;
   const RemoveFromMyList({required this.animeId});
   @override
   List<Object> get props => [animeId];
+}
+
+class AddOrUpdateEntry extends MyListEvent {
+  final MyAnimeEntryModel entry;
+
+  const AddOrUpdateEntry({required this.entry});
+
+  @override
+  List<Object> get props => [entry];
 }

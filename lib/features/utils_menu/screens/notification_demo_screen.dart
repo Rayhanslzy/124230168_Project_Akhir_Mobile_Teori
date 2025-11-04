@@ -1,5 +1,5 @@
 // ---------------------------------------------------
-// lib/features/utils_menu/screens/notification_demo_screen.dart (File Baru)
+// lib/features/utils_menu/screens/notification_demo_screen.dart
 // ---------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -9,18 +9,15 @@ class NotificationDemoScreen extends StatelessWidget {
   const NotificationDemoScreen({super.key});
 
   void _scheduleTestNotification(BuildContext context) {
-    // Ambil service notifikasi
     final notificationService = NotificationService();
 
-    // Jadwalkan notifikasi
     notificationService.scheduleNotification(
-      id: 1, // ID unik untuk notifikasi ini
+      id: 1,
       title: 'Reminder Anime!',
       body: 'Jangan lupa nonton episode terbaru Attack on Titan!',
-      duration: const Duration(seconds: 5), // Tampilkan dalam 5 detik
+      duration: const Duration(seconds: 5),
     );
 
-    // Tampilkan snackbar konfirmasi
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Notifikasi dijadwalkan! Cek dalam 5 detik.'),

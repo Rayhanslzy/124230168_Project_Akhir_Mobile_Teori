@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/my_list/bloc/my_list_state.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// --------------------------------------------
+// lib/features/my_list/bloc/my_list_state.dart
+// --------------------------------------------
 
 part of 'my_list_bloc.dart';
 

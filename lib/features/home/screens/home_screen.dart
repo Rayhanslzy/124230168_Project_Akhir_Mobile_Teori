@@ -1,16 +1,15 @@
-// ---------------------------------------------------
-// lib/features/home/screens/home_screen.dart (REVISI - Hapus unused import)
-// ---------------------------------------------------
+// ------------------------------------------
+// lib/features/home/screens/home_screen.dart
+// ------------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:ta_teori/data/models/anime_model.dart'; // <-- BARIS INI DIHAPUS
 import 'package:ta_teori/data/repositories/anime_repository.dart';
 import 'package:ta_teori/features/anime_detail/screens/anime_detail_screen.dart';
 import 'package:ta_teori/features/home/bloc/home_bloc.dart';
-import 'package:ta_teori/core/widgets/anime_card.dart'; // <-- Ini sudah benar
+import 'package:ta_teori/core/widgets/anime_card.dart';
 
-// Ini adalah "Halaman Wrapper" yang menyediakan BLoC
+//"Halaman Wrapper" yang menyediakan BLoC
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -18,12 +17,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HomeBloc(
-        // 1. Ambil AnimeRepository yang sudah kita daftarkan di main.dart
         animeRepository: RepositoryProvider.of<AnimeRepository>(context),
       )
-        // 2. Kirim event 'FetchHomeData' SEGERA setelah BLoC dibuat
-        ..add(FetchHomeData()),
-      child: const HomeView(), // Tampilkan UI-nya
+        ..add(const FetchHomeData()),
+      child: const HomeView(),
     );
   }
 }
@@ -36,46 +33,38 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Anime Populer Musim Ini'),
+        title: const Text('Trending Now🔥'),
         actions: [
-          // Tambahkan tombol refresh untuk testing
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // Kirim event lagi untuk refresh data
-              context.read<HomeBloc>().add(FetchHomeData());
+              context.read<HomeBloc>().add(const FetchHomeData(isRefresh: true));
             },
           ),
         ],
       ),
-      // 3. Gunakan BlocBuilder untuk membangun UI berdasarkan state
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          // --- State Loading ---
           if (state is HomeLoading || state is HomeInitial) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          // --- State Sukses (Loaded) ---
           if (state is HomeLoaded) {
-            // Tampilkan data menggunakan GridView
             return GridView.builder(
               padding: const EdgeInsets.all(8.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 kolom
-                childAspectRatio: 0.7, // Rasio aspek (tinggi > lebar)
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: state.popularAnime.length, // Jumlah item
+              itemCount: state.popularAnime.length,
               itemBuilder: (context, index) {
                 final anime = state.popularAnime[index];
-                // Tampilkan kartu anime
                 return GestureDetector(
                   onTap: () {
-                    // Navigasi ke Halaman Detail
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) =>
@@ -89,7 +78,6 @@ class HomeView extends StatelessWidget {
             );
           }
 
-          // --- State Error ---
           if (state is HomeError) {
             return Center(
               child: Padding(
@@ -103,7 +91,6 @@ class HomeView extends StatelessWidget {
             );
           }
 
-          // State default jika terjadi sesuatu yang aneh
           return const Center(child: Text('Terjadi kesalahan.'));
         },
       ),

@@ -1,10 +1,8 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'saran_kesan_model.dart';
 
-// **************************************************************************
+// ********************
 // TypeAdapterGenerator
-// **************************************************************************
+// ********************
 
 class SaranKesanAdapter extends TypeAdapter<SaranKesan> {
   @override

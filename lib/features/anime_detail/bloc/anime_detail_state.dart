@@ -1,5 +1,5 @@
 // ---------------------------------------------------
-// lib/features/anime_detail/bloc/anime_detail_state.dart (Versi Final - Sudah Diformat)
+// lib/features/anime_detail/bloc/anime_detail_state.dart
 // ---------------------------------------------------
 
 part of 'anime_detail_bloc.dart';
@@ -10,10 +10,8 @@ abstract class AnimeDetailState extends Equatable {
   List<Object?> get props => [];
 }
 
-// State awal saat loading data dari API
 class AnimeDetailLoading extends AnimeDetailState {}
 
-// State saat gagal load dari API
 class AnimeDetailError extends AnimeDetailState {
   final String message;
   const AnimeDetailError({required this.message});
@@ -21,11 +19,10 @@ class AnimeDetailError extends AnimeDetailState {
   List<Object> get props => [message];
 }
 
-// State saat semua data berhasil dimuat
 class AnimeDetailLoaded extends AnimeDetailState {
-  final AnimeModel anime; // Data dari API
-  final bool isInMyList; // Status dari Hive
-  final MyAnimeEntryModel? entry; // Data dari Hive (jika ada)
+  final AnimeModel anime;
+  final bool isInMyList;
+  final MyAnimeEntryModel? entry;
 
   const AnimeDetailLoaded({
     required this.anime,
@@ -36,7 +33,6 @@ class AnimeDetailLoaded extends AnimeDetailState {
   @override
   List<Object?> get props => [anime, isInMyList, entry];
 
-  // Helper method untuk copy state
   AnimeDetailLoaded copyWith({
     AnimeModel? anime,
     bool? isInMyList,
@@ -45,8 +41,6 @@ class AnimeDetailLoaded extends AnimeDetailState {
     return AnimeDetailLoaded(
       anime: anime ?? this.anime,
       isInMyList: isInMyList ?? this.isInMyList,
-      // Penting: kita harus bisa set 'entry' menjadi null
-      // jika kita menghapus dari list
       entry: entry,
     );
   }

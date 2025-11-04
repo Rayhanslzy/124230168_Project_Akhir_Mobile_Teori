@@ -1,9 +1,9 @@
-// ---------------------------------------------------
-// lib/core/widgets/anime_card.dart (File BARU)
-// ---------------------------------------------------
+// --------------------------------
+// lib/core/widgets/anime_card.dart
+// --------------------------------
 
 import 'package:flutter/material.dart';
-import 'package:ta_teori/data/models/anime_model.dart'; // 1. Tambahkan import ini
+import 'package:ta_teori/data/models/anime_model.dart';
 
 class AnimeCard extends StatelessWidget {
   final AnimeModel anime;

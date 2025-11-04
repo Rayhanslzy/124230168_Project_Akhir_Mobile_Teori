@@ -1,10 +1,8 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'my_anime_entry_model.dart';
 
-// **************************************************************************
+// ********************
 // TypeAdapterGenerator
-// **************************************************************************
+// ********************
 
 class MyAnimeEntryModelAdapter extends TypeAdapter<MyAnimeEntryModel> {
   @override

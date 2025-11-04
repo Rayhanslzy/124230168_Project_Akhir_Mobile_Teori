@@ -1,6 +1,6 @@
-// ---------------------------------------------------
-// lib/features/search/bloc/search_state.dart (Versi Final - Sudah Diformat)
-// ---------------------------------------------------
+// ------------------------------------------
+// lib/features/search/bloc/search_state.dart
+// ------------------------------------------
 
 part of 'search_bloc.dart';
 
@@ -10,8 +10,16 @@ abstract class SearchState extends Equatable {
   List<Object> get props => [];
 }
 
-class SearchInitial extends SearchState {} // State awal
-class SearchLoading extends SearchState {} // State loading
+class SearchInitial extends SearchState {
+  final List<String> recentSearches;
+
+  const SearchInitial({this.recentSearches = const []});
+
+  @override
+  List<Object> get props => [recentSearches];
+}
+
+class SearchLoading extends SearchState {}
 
 class SearchLoaded extends SearchState {
   // State sukses

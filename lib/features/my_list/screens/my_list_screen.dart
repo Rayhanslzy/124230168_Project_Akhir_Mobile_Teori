@@ -1,26 +1,18 @@
-// ---------------------------------------------------
-// lib/features/my_list/screens/my_list_screen.dart (REVISI - Hapus unused import)
-// ---------------------------------------------------
+// ------------------------------------------------
+// lib/features/my_list/screens/my_list_screen.dart
+// ------------------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:ta_teori/data/models/my_anime_entry_model.dart'; // <-- BARIS INI DIHAPUS
-import 'package:ta_teori/data/repositories/my_list_repository.dart';
+import 'package:ta_teori/features/anime_detail/screens/anime_detail_screen.dart';
 import 'package:ta_teori/features/my_list/bloc/my_list_bloc.dart';
 
-// Halaman Wrapper untuk menyediakan BLoC
 class MyListScreen extends StatelessWidget {
   const MyListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MyListBloc(
-        myListRepository: RepositoryProvider.of<MyListRepository>(context),
-      )
-        ..add(LoadMyList()), // Langsung kirim event untuk load data
-      child: const MyListView(),
-    );
+    return const MyListView();
   }
 }
 
@@ -34,17 +26,14 @@ class MyListView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Anime List (Lokal)'),
       ),
-      // Kita gunakan BlocBuilder untuk menampilkan data
       body: BlocBuilder<MyListBloc, MyListState>(
         builder: (context, state) {
-          // --- State Loading ---
+
           if (state is MyListLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // --- State Sukses (Loaded) ---
           if (state is MyListLoaded) {
-            // Jika list kosong
             if (state.myList.isEmpty) {
               return const Center(
                 child: Padding(
@@ -57,7 +46,6 @@ class MyListView extends StatelessWidget {
               );
             }
 
-            // Tampilkan list menggunakan ListView
             return ListView.builder(
               itemCount: state.myList.length,
               itemBuilder: (context, index) {
@@ -74,11 +62,19 @@ class MyListView extends StatelessWidget {
                   title: Text(entry.title),
                   subtitle: Text(
                       'Status: ${entry.status} | Skor: ${entry.userScore ?? 'N/A'}'),
-                  // Tombol Hapus
+                  
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AnimeDetailScreen(animeId: entry.animeId),
+                      ),
+                    );
+                  },
+
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
-                      // Tampilkan dialog konfirmasi
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
@@ -94,7 +90,6 @@ class MyListView extends StatelessWidget {
                               child: const Text('Hapus',
                                   style: TextStyle(color: Colors.red)),
                               onPressed: () {
-                                // Kirim event hapus ke BLoC
                                 context
                                     .read<MyListBloc>()
                                     .add(RemoveFromMyList(animeId: entry.animeId));
