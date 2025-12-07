@@ -82,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 accountName: Text(username, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                accountEmail: const Text('Project Akhir - 124230168, 124230118'),
+                accountEmail: const Text('Project Akhir - 124230168'),
                 decoration: const BoxDecoration(color: Colors.black45),
               ),
 
