@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../logic/my_list_bloc.dart';
-import 'anime_detail_screen.dart'; // Sesama folder screens
+import 'anime_detail_screen.dart';
 
 class MyListScreen extends StatelessWidget {
   const MyListScreen({super.key});
@@ -16,7 +16,6 @@ class MyListScreen extends StatelessWidget {
   }
 }
 
-// UI Halaman "My List"
 class MyListView extends StatelessWidget {
   const MyListView({super.key});
 
@@ -59,7 +58,7 @@ class MyListView extends StatelessWidget {
                     child: Image.network(
                       entry.coverImageUrl,
                       width: 50,
-                      height: 70, // Sedikit lebih tinggi agar proporsional
+                      height: 70, 
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.broken_image),
@@ -71,8 +70,6 @@ class MyListView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  // --- PERUBAHAN DI SINI ---
-                  // Menampilkan Episode Progress, bukan Skor
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
@@ -80,7 +77,6 @@ class MyListView extends StatelessWidget {
                       style: const TextStyle(color: Colors.blueAccent),
                     ),
                   ),
-
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -89,7 +85,6 @@ class MyListView extends StatelessWidget {
                       ),
                     );
                   },
-
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.grey),
                     onPressed: () {
@@ -108,8 +103,9 @@ class MyListView extends StatelessWidget {
                               child: const Text('Hapus',
                                   style: TextStyle(color: Colors.red)),
                               onPressed: () {
+                                // FIX ERROR 5: Wajib sertakan userId
                                 context.read<MyListBloc>().add(
-                                    RemoveFromMyList(animeId: entry.animeId));
+                                    RemoveFromMyList(userId: entry.userId, animeId: entry.animeId));
                                 Navigator.of(ctx).pop();
                               },
                             ),

@@ -9,7 +9,6 @@ class AnilistApiProvider {
 
   AnilistApiProvider({required this.client});
 
-  // Helper untuk mendapatkan Season & Tahun saat ini
   Map<String, dynamic> _getCurrentSeason() {
     final now = DateTime.now();
     int year = now.year;
@@ -44,7 +43,6 @@ class AnilistApiProvider {
   Future<Map<String, dynamic>> getHomeData({bool isRefresh = false}) async {
     final seasonData = _getCurrentSeason();
 
-    // UBAH perPage JADI 20 AGAR SCROLL LEBIH PANJANG
     final String queryString = """
       query(\$season: MediaSeason, \$year: Int, \$nextSeason: MediaSeason, \$nextYear: Int) {
         trending: Page(page: 1, perPage: 20) { 
@@ -71,13 +69,8 @@ class AnilistApiProvider {
 
       fragment mediaFields on Media {
         id
-        title {
-          romaji
-          english
-        }
-        coverImage {
-          large
-        }
+        title { romaji english }
+        coverImage { large }
         averageScore
         genres
         status
@@ -89,7 +82,7 @@ class AnilistApiProvider {
 
     final QueryOptions options = QueryOptions(
       document: gql(queryString),
-      fetchPolicy: FetchPolicy.noCache, // Tetap noCache agar aman dari error hive
+      fetchPolicy: FetchPolicy.noCache,
       variables: {
         'season': seasonData['season'],
         'year': seasonData['year'],
@@ -113,13 +106,8 @@ class AnilistApiProvider {
         Page(page: 1, perPage: 20) {
           media(type: ANIME, search: \$search, sort: [POPULARITY_DESC]) {
             id
-            title {
-              romaji
-              english
-            }
-            coverImage {
-              large
-            }
+            title { romaji english }
+            coverImage { large }
             averageScore
             genres
             status
@@ -145,6 +133,7 @@ class AnilistApiProvider {
   }
 
   Future<Map<String, dynamic>> getAnimeDetail(int animeId) async {
+    // UPDATE QUERY: Tambah 'nextAiringEpisode'
     const String queryString = """
       query (\$id: Int) {
         Media(id: \$id, type: ANIME) {
@@ -159,6 +148,11 @@ class AnilistApiProvider {
           season
           seasonYear
           trailer { id site }
+          nextAiringEpisode {
+             airingAt
+             timeUntilAiring
+             episode
+          }
           characters(sort: ROLE, perPage: 6) {
             nodes {
               name { full }

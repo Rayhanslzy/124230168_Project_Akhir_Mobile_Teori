@@ -14,13 +14,22 @@ abstract class MyListEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadMyList extends MyListEvent {}
+class LoadMyList extends MyListEvent {
+  final String userId;
+  const LoadMyList({required this.userId});
+  @override
+  List<Object> get props => [userId];
+}
+
+// EVENT BARU: Buat hapus memori saat logout
+class ClearMyList extends MyListEvent {} 
 
 class RemoveFromMyList extends MyListEvent {
+  final String userId;
   final int animeId;
-  const RemoveFromMyList({required this.animeId});
+  const RemoveFromMyList({required this.userId, required this.animeId});
   @override
-  List<Object> get props => [animeId];
+  List<Object> get props => [userId, animeId];
 }
 
 class AddOrUpdateEntry extends MyListEvent {
@@ -30,20 +39,21 @@ class AddOrUpdateEntry extends MyListEvent {
   List<Object> get props => [entry];
 }
 
-// UPDATE: Tambah parameter maxEpisodes untuk logika status otomatis
 class UpdateEpisodeProgress extends MyListEvent {
+  final String userId;
   final int animeId;
   final int newProgress;
   final int maxEpisodes; 
 
   const UpdateEpisodeProgress({
+    required this.userId,
     required this.animeId, 
     required this.newProgress,
     required this.maxEpisodes,
   });
 
   @override
-  List<Object> get props => [animeId, newProgress, maxEpisodes];
+  List<Object> get props => [userId, animeId, newProgress, maxEpisodes];
 }
 
 // --- STATES ---
@@ -68,47 +78,44 @@ class MyListBloc extends Bloc<MyListEvent, MyListState> {
 
   MyListBloc({required this.myListRepository}) : super(MyListLoading()) {
     
-    // Load Data
     on<LoadMyList>((event, emit) {
       try {
-        final list = myListRepository.getMyList();
+        final list = myListRepository.getMyList(event.userId);
         emit(MyListLoaded(myList: list));
       } catch (e) {
         emit(const MyListLoaded(myList: []));
       }
     });
 
-    // Add / Update Data
+    // HANDLER BARU: Reset state jadi kosong
+    on<ClearMyList>((event, emit) {
+      emit(const MyListLoaded(myList: [])); 
+    });
+
     on<AddOrUpdateEntry>((event, emit) async {
       await myListRepository.addOrUpdateAnime(event.entry);
-      add(LoadMyList()); // Reload UI setelah update
+      add(LoadMyList(userId: event.entry.userId)); 
     });
 
-    // Remove Data
     on<RemoveFromMyList>((event, emit) async {
-      await myListRepository.deleteAnime(event.animeId);
-      add(LoadMyList());
+      await myListRepository.deleteAnime(event.userId, event.animeId);
+      add(LoadMyList(userId: event.userId));
     });
 
-    // HANDLER UPDATE: Logika Otomatisasi Status
     on<UpdateEpisodeProgress>((event, emit) async {
-      final entry = myListRepository.getEntry(event.animeId);
+      final entry = myListRepository.getEntry(event.userId, event.animeId);
       
       if (entry != null) {
-        // Update progress
         entry.episodesWatched = event.newProgress;
         
-        // Logika 1: Jika progress menyentuh max -> Completed
         if (event.maxEpisodes > 0 && entry.episodesWatched >= event.maxEpisodes) {
           entry.status = 'Completed';
-        } 
-        // Logika 2: Jika progress bertambah (>0) dari Planning -> Watching
-        else if (entry.episodesWatched > 0 && entry.status == 'Planning') {
+        } else if (entry.episodesWatched > 0 && entry.status == 'Planning') {
           entry.status = 'Watching';
         }
 
         await entry.save(); 
-        add(LoadMyList());
+        add(LoadMyList(userId: event.userId));
       }
     });
   }

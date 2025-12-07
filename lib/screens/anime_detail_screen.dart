@@ -12,7 +12,7 @@ import '../repositories/anime_repository.dart';
 import '../repositories/my_list_repository.dart';
 import '../logic/anime_detail_bloc.dart';
 import '../logic/my_list_bloc.dart' as my_list;
-// HAPUS: Import NotificationService tidak dibutuhkan di sini lagi
+import '../logic/location_cubit.dart'; 
 
 class AnimeDetailScreen extends StatelessWidget {
   final int animeId;
@@ -24,9 +24,19 @@ class AnimeDetailScreen extends StatelessWidget {
       create: (context) => AnimeDetailBloc(
         animeRepository: context.read<AnimeRepository>(),
         myListRepository: context.read<MyListRepository>(),
+        // Ambil UserID dari AuthBloc (via context) atau inject dari luar
+        // Disini kita ambil manual lewat logic di View nanti
+        userId: _getUserId(context), 
       )..add(LoadAnimeDetail(animeId: animeId)),
       child: const AnimeDetailView(),
     );
+  }
+
+  // Helper ambil UserID
+  String _getUserId(BuildContext context) {
+    // Kita anggap logic Auth sudah handle ini, default guest jika null
+    // (Implementasi real-nya bisa ambil dari AuthBloc state)
+    return 'guest'; 
   }
 }
 
@@ -91,6 +101,9 @@ class AnimeDetailView extends StatelessWidget {
                           _buildHeaderInfo(context, anime),
                           const SizedBox(height: 16),
                           
+                          _buildAiringSchedule(context, anime),
+                          const SizedBox(height: 16),
+
                           if (state.isInMyList && state.entry != null)
                             _buildEpisodeProgress(context, state.entry!, anime),
                           
@@ -124,6 +137,57 @@ class AnimeDetailView extends StatelessWidget {
     );
   }
 
+  Widget _buildAiringSchedule(BuildContext context, AnimeModel anime) {
+    if (anime.nextAiringEpisode == null || anime.airingAt == null) {
+      return const SizedBox.shrink(); 
+    }
+
+    return BlocBuilder<LocationCubit, LocationState>(
+      builder: (context, locState) {
+        String scheduleText = "Memuat Jadwal...";
+        
+        if (locState is LocationLoaded) {
+          final airingUtc = DateTime.fromMillisecondsSinceEpoch(anime.airingAt! * 1000, isUtc: true);
+          final localTime = airingUtc.add(Duration(hours: locState.offset));
+          final dateFormat = DateFormat('EEEE, HH:mm', 'id_ID'); 
+          scheduleText = "Eps ${anime.nextAiringEpisode}: ${dateFormat.format(localTime)} ${locState.zone}";
+        }
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.indigoAccent.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.indigoAccent),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.access_time_filled, color: Colors.indigoAccent),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Jadwal Tayang (Lokasimu)",
+                      style: TextStyle(fontSize: 12, color: Colors.indigoAccent, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      scheduleText,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildHeaderInfo(BuildContext context, AnimeModel anime) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,9 +213,11 @@ class AnimeDetailView extends StatelessWidget {
     );
   }
 
-  // --- WIDGET PROGRESS DENGAN FIX TOMBOL +/- ---
   Widget _buildEpisodeProgress(BuildContext context, MyAnimeEntryModel entry, AnimeModel anime) {
     final maxEps = anime.episodes ?? 0;
+    // AMBIL USER ID DARI BLOC
+    final userId = context.read<AnimeDetailBloc>().userId;
+
     return Container(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
@@ -194,8 +260,8 @@ class AnimeDetailView extends StatelessWidget {
                           progress: entry.episodesWatched - 1,
                           maxEpisodes: maxEps,
                         ));
-                        // Update global list juga agar sinkron
-                        context.read<my_list.MyListBloc>().add(my_list.LoadMyList());
+                        // FIX ERROR 1: Tambahkan userId
+                        context.read<my_list.MyListBloc>().add(my_list.LoadMyList(userId: userId));
                       }
                     : null,
               ),
@@ -210,8 +276,8 @@ class AnimeDetailView extends StatelessWidget {
                           progress: entry.episodesWatched + 1,
                           maxEpisodes: maxEps,
                         ));
-                        // Update global list juga agar sinkron
-                        context.read<my_list.MyListBloc>().add(my_list.LoadMyList());
+                        // FIX ERROR 2: Tambahkan userId
+                        context.read<my_list.MyListBloc>().add(my_list.LoadMyList(userId: userId));
                       } 
                     : null,
               ),
@@ -244,8 +310,9 @@ class AnimeDetailView extends StatelessWidget {
   void _showEditorModal(BuildContext context, AnimeModel anime, MyAnimeEntryModel? entry) {
     final detailBloc = context.read<AnimeDetailBloc>();
     final myListBloc = context.read<my_list.MyListBloc>();
+    // AMBIL USER ID DARI BLOC
+    final userId = detailBloc.userId;
 
-    // Variabel untuk mendeteksi apakah ini data baru atau update
     final bool isNewEntry = entry == null;
 
     String currentStatus = entry?.status ?? 'Planning';
@@ -305,7 +372,8 @@ class AnimeDetailView extends StatelessWidget {
                                   TextButton(
                                     onPressed: () {
                                       detailBloc.add(RemoveFromMyList(animeId: anime.id));
-                                      myListBloc.add(my_list.RemoveFromMyList(animeId: anime.id));
+                                      // FIX ERROR 3: Tambahkan userId
+                                      myListBloc.add(my_list.RemoveFromMyList(userId: userId, animeId: anime.id));
                                       Navigator.pop(context);
                                     },
                                     child: const Text("Delete", style: TextStyle(color: Colors.redAccent)),
@@ -313,7 +381,6 @@ class AnimeDetailView extends StatelessWidget {
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
                                   onPressed: () {
-                                    // --- LOGIKA OTOMATIS DI TOMBOL SAVE ---
                                     String finalStatus = currentStatus;
                                     if (maxEpisodes > 0 && currentProgress >= maxEpisodes) {
                                       finalStatus = 'Completed';
@@ -334,15 +401,13 @@ class AnimeDetailView extends StatelessWidget {
                                       notes: notes,
                                     ));
 
-                                    // Refresh global list juga
-                                    myListBloc.add(my_list.LoadMyList());
-                                    Navigator.pop(context); // Tutup BottomSheet
+                                    // FIX ERROR 4: Tambahkan userId
+                                    myListBloc.add(my_list.LoadMyList(userId: userId));
+                                    Navigator.pop(context);
 
-                                    // --- POPUP DIALOG SUKSES (IN-APP) ---
-                                    // Menggunakan showDialog agar muncul di tengah layar
                                     if (isNewEntry) {
                                       showDialog(
-                                        context: context, // Gunakan context dari parent (AnimeDetailScreen)
+                                        context: context,
                                         builder: (dialogCtx) {
                                           return AlertDialog(
                                             backgroundColor: const Color(0xFF1F2937),
@@ -463,26 +528,6 @@ class AnimeDetailView extends StatelessWidget {
                               ),
                               const SizedBox(width: 12),
                               const Expanded(child: SizedBox()), 
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              _buildInputContainer(
-                                label: "Finish Date",
-                                child: GestureDetector(
-                                  onTap: () => pickDate(false),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(finishDate != null ? DateFormat('yyyy-MM-dd').format(finishDate!) : "Set Date", style: TextStyle(color: finishDate != null ? Colors.white : Colors.grey)),
-                                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(flex: 2, child: SizedBox()), 
                             ],
                           ),
                           const SizedBox(height: 16),

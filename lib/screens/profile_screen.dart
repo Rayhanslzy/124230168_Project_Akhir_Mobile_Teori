@@ -1,7 +1,3 @@
-// ---------------------------------------------------
-// lib/features/profile/screens/profile_screen.dart
-// ---------------------------------------------------
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:ta_teori/logic/auth_bloc.dart';
+import 'package:ta_teori/screens/feedback_screen.dart';
+import 'package:ta_teori/screens/currency_screen.dart'; // <--- IMPORT INI
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -41,9 +39,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil Saya'),
-      ),
+      appBar: AppBar(title: const Text('Profil Saya')),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           String username = 'Guest';
@@ -72,9 +68,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               UserAccountsDrawerHeader(
                 currentAccountPicture: GestureDetector(
-                  onTap: () {
-                    _pickImage(context);
-                  },
+                  onTap: () => _pickImage(context),
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
@@ -87,22 +81,42 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                accountName: Text(
-                  username,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                accountEmail: const Text('Project Akhir - 124230168'),
-                decoration: const BoxDecoration(
-                  color: Colors.black45,
-                ),
+                accountName: Text(username, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                accountEmail: const Text('Project Akhir - 124230168, 124230118'),
+                decoration: const BoxDecoration(color: Colors.black45),
+              ),
+
+              const Padding(
+                padding: EdgeInsets.only(left: 16, top: 10, bottom: 5),
+                child: Text("Pengaturan & Lainnya", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+              ),
+
+              // Menu Saran & Kesan
+              ListTile(
+                leading: const Icon(Icons.feedback, color: Colors.orangeAccent),
+                title: const Text('Saran & Kesan'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedbackScreen()));
+                },
+              ),
+
+              // --- MENU BARU: KALKULATOR WIBU ---
+              ListTile(
+                leading: const Icon(Icons.currency_exchange, color: Colors.greenAccent),
+                title: const Text('Kalkulator Wibu (Kurs Yen)'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrencyScreen()));
+                },
               ),
 
               const Divider(),
+              
+              // Logout
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
-                title:
-                    const Text('Logout', style: TextStyle(color: Colors.red)),
+                title: const Text('Logout', style: TextStyle(color: Colors.red)),
                 onTap: () {
                   showDialog(
                     context: context,
@@ -110,17 +124,12 @@ class ProfileScreen extends StatelessWidget {
                       title: const Text('Logout'),
                       content: const Text('Anda yakin ingin logout?'),
                       actions: [
+                        TextButton(child: const Text('Batal'), onPressed: () => Navigator.of(ctx).pop()),
                         TextButton(
-                          child: const Text('Batal'),
-                          onPressed: () => Navigator.of(ctx).pop(),
-                        ),
-                        TextButton(
-                          child: const Text('Logout',
-                              style: TextStyle(color: Colors.red)),
+                          child: const Text('Logout', style: TextStyle(color: Colors.red)),
                           onPressed: () {
                             context.read<AuthBloc>().add(LogoutButtonPressed());
                             Navigator.of(ctx).pop();
-                            
                           },
                         ),
                       ],

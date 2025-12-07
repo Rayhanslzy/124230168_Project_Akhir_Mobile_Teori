@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../repositories/anime_repository.dart';
 import '../logic/home_bloc.dart';
+import '../logic/location_cubit.dart'; // <--- IMPORT CUBIT LOKASI
 import '../models/anime_model.dart';
 import '../widgets/anime_card.dart';
 import 'anime_detail_screen.dart';
@@ -31,11 +32,38 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AniList Home', style: TextStyle(fontWeight: FontWeight.bold)),
+        // UPDATE TITLE BIAR ADA LOKASI
+        title: BlocBuilder<LocationCubit, LocationState>(
+          builder: (context, state) {
+            if (state is LocationLoaded) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('AniList Home', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 12, color: Colors.blueAccent),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${state.city} • ${state.zone}", 
+                        style: const TextStyle(fontSize: 12, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }
+            return const Text('AniList Home', style: TextStyle(fontWeight: FontWeight.bold));
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<HomeBloc>().add(const FetchHomeData(isRefresh: true)),
+            onPressed: () {
+              context.read<HomeBloc>().add(const FetchHomeData(isRefresh: true));
+              // Refresh Lokasi juga kalau mau
+              context.read<LocationCubit>().detectLocation(); 
+            },
           ),
         ],
       ),
@@ -53,19 +81,15 @@ class HomeView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TRENDING
                     _buildSectionHeader("TRENDING NOW"),
                     _buildHorizontalList(context, state.trending),
 
-                    // THIS SEASON
                     _buildSectionHeader("POPULAR THIS SEASON"),
                     _buildHorizontalList(context, state.thisSeason),
 
-                    // NEXT SEASON
                     _buildSectionHeader("UPCOMING NEXT SEASON"),
                     _buildHorizontalList(context, state.nextSeason),
 
-                    // ALL TIME
                     _buildSectionHeader("ALL TIME POPULAR"),
                     _buildHorizontalList(context, state.allTime),
                     
@@ -86,7 +110,6 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  // Widget Header Simpel (Tanpa View All)
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
@@ -96,26 +119,25 @@ class HomeView extends StatelessWidget {
           fontSize: 16,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.0,
-          color: Colors.white, // Pastikan kontras dengan background gelap
+          color: Colors.white, 
         ),
       ),
     );
   }
 
-  // Widget List Horizontal (Bisa digeser)
   Widget _buildHorizontalList(BuildContext context, List<AnimeModel> animeList) {
     return SizedBox(
-      height: 230, // Tinggi area list sedikit ditambah agar tidak terpotong
+      height: 230, 
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        scrollDirection: Axis.horizontal, // Fitur scroll ke samping
-        physics: const BouncingScrollPhysics(), // Efek pantul saat mentok (iOS style)
+        scrollDirection: Axis.horizontal, 
+        physics: const BouncingScrollPhysics(), 
         itemCount: animeList.length,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
           final anime = animeList[index];
           return SizedBox(
-            width: 125, // Lebar kartu
+            width: 125, 
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).push(

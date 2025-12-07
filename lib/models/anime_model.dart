@@ -1,3 +1,7 @@
+// ---------------------------------------------------
+// lib/models/anime_model.dart
+// ---------------------------------------------------
+
 class AnimeModel {
   final int id;
   final String title;
@@ -6,14 +10,17 @@ class AnimeModel {
   final String? description;
   final List<String>? genres;
   
-  // --- Data Baru untuk Detail Lengkap ---
   final String? status;
   final int? episodes;
   final String? season;
   final int? seasonYear;
-  final String? trailerUrl; // URL YouTube
+  final String? trailerUrl;
   final List<CharacterModel>? characters;
   final List<AnimeModel>? recommendations;
+  
+  // --- DATA BARU: JADWAL TAYANG ---
+  final int? nextAiringEpisode; // Episode ke berapa (misal: 5)
+  final int? airingAt;          // Detik (Timestamp) kapan tayang
 
   AnimeModel({
     required this.id,
@@ -29,16 +36,16 @@ class AnimeModel {
     this.trailerUrl,
     this.characters,
     this.recommendations,
+    this.nextAiringEpisode,
+    this.airingAt,
   });
 
   factory AnimeModel.fromJson(Map<String, dynamic> json) {
-    // Helper untuk trailer
     String? trailer;
     if (json['trailer'] != null && json['trailer']['site'] == 'youtube') {
       trailer = 'https://www.youtube.com/watch?v=${json['trailer']['id']}';
     }
 
-    // Helper untuk Karakter
     List<CharacterModel>? chars;
     if (json['characters'] != null && json['characters']['nodes'] != null) {
       chars = (json['characters']['nodes'] as List)
@@ -46,13 +53,20 @@ class AnimeModel {
           .toList();
     }
 
-    // Helper untuk Rekomendasi
     List<AnimeModel>? recs;
     if (json['recommendations'] != null && json['recommendations']['nodes'] != null) {
       recs = (json['recommendations']['nodes'] as List)
-          .where((r) => r['mediaRecommendation'] != null) // Filter yang null
+          .where((r) => r['mediaRecommendation'] != null)
           .map((r) => AnimeModel.fromJson(r['mediaRecommendation']))
           .toList();
+    }
+
+    // Ambil data Next Episode
+    int? nextEp;
+    int? airTime;
+    if (json['nextAiringEpisode'] != null) {
+      nextEp = json['nextAiringEpisode']['episode'];
+      airTime = json['nextAiringEpisode']['airingAt'];
     }
 
     return AnimeModel(
@@ -71,6 +85,8 @@ class AnimeModel {
       trailerUrl: trailer,
       characters: chars,
       recommendations: recs,
+      nextAiringEpisode: nextEp,
+      airingAt: airTime,
     );
   }
 }

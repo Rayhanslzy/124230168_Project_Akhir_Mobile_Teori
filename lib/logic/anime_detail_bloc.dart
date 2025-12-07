@@ -59,7 +59,6 @@ class RemoveFromMyList extends AnimeDetailEvent {
   List<Object> get props => [animeId];
 }
 
-// EVENT BARU: Khusus untuk tombol +/- agar update instan
 class UpdateEntryProgress extends AnimeDetailEvent {
   final int progress;
   final int maxEpisodes;
@@ -115,18 +114,21 @@ class AnimeDetailLoaded extends AnimeDetailState {
 class AnimeDetailBloc extends Bloc<AnimeDetailEvent, AnimeDetailState> {
   final AnimeRepository animeRepository;
   final MyListRepository myListRepository;
+  final String userId; // DATA BARU: Wajib tau siapa yang login
 
   AnimeDetailBloc({
     required this.animeRepository,
     required this.myListRepository,
+    required this.userId, 
   }) : super(AnimeDetailLoading()) {
     
     on<LoadAnimeDetail>((event, emit) async {
       emit(AnimeDetailLoading());
       try {
         final anime = await animeRepository.getAnimeDetail(event.animeId);
-        final bool isInList = myListRepository.isInList(event.animeId);
-        final MyAnimeEntryModel? entry = isInList ? myListRepository.getEntry(event.animeId) : null;
+        // Cek list pake userId
+        final bool isInList = myListRepository.isInList(userId, event.animeId);
+        final MyAnimeEntryModel? entry = isInList ? myListRepository.getEntry(userId, event.animeId) : null;
 
         emit(AnimeDetailLoaded(
           anime: anime,
@@ -153,6 +155,7 @@ class AnimeDetailBloc extends Bloc<AnimeDetailEvent, AnimeDetailState> {
           finishDate: event.finishDate,
           totalRewatches: event.totalRewatches,
           notes: event.notes,
+          userId: userId, // Masukkan userId ke data
         );
 
         await myListRepository.addOrUpdateAnime(newEntry);
@@ -166,12 +169,12 @@ class AnimeDetailBloc extends Bloc<AnimeDetailEvent, AnimeDetailState> {
 
     on<RemoveFromMyList>((event, emit) async {
       if (state is AnimeDetailLoaded) {
-        await myListRepository.deleteAnime(event.animeId);
+        // Hapus spesifik punya user ini
+        await myListRepository.deleteAnime(userId, event.animeId);
         emit((state as AnimeDetailLoaded).copyWith(isInMyList: false, entry: null));
       }
     });
 
-    // HANDLER BARU: Update Progress Tanpa Race Condition
     on<UpdateEntryProgress>((event, emit) async {
       if (state is AnimeDetailLoaded) {
         final currentState = state as AnimeDetailLoaded;
@@ -180,14 +183,12 @@ class AnimeDetailBloc extends Bloc<AnimeDetailEvent, AnimeDetailState> {
         final oldEntry = currentState.entry!;
         String newStatus = oldEntry.status;
 
-        // Logika Otomatisasi Status
         if (event.maxEpisodes > 0 && event.progress >= event.maxEpisodes) {
           newStatus = 'Completed';
         } else if (event.progress > 0 && newStatus == 'Planning') {
           newStatus = 'Watching';
         }
 
-        // Buat object baru agar State terdeteksi berubah
         final newEntry = MyAnimeEntryModel(
           animeId: oldEntry.animeId,
           title: oldEntry.title,
@@ -199,12 +200,11 @@ class AnimeDetailBloc extends Bloc<AnimeDetailEvent, AnimeDetailState> {
           finishDate: oldEntry.finishDate,
           totalRewatches: oldEntry.totalRewatches,
           notes: oldEntry.notes,
+          userId: userId, // Jangan lupa userId
         );
 
-        // Simpan ke Hive
         await myListRepository.addOrUpdateAnime(newEntry);
 
-        // Update UI langsung
         emit(currentState.copyWith(entry: newEntry));
       }
     });
